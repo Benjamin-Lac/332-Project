@@ -73,10 +73,10 @@ erDiagram
 ## Part A: Physical Model
 
 Physical SQL model is implemented in:
-- `/home/runner/work/332-Project/332-Project/sql/world_physical_model.sql`
+- `sql/world_physical_model.sql`
 
 Additional seed data is implemented in:
-- `/home/runner/work/332-Project/332-Project/sql/additional_data.sql`
+- `sql/additional_data.sql`
 
 ### Integrity Constraints Included
 - Primary keys on all entities
@@ -88,7 +88,7 @@ Additional seed data is implemented in:
 ## Part B: 20 Innovative Queries
 
 All 20 queries are in:
-- `/home/runner/work/332-Project/332-Project/sql/part_b_queries.sql`
+- `sql/part_b_queries.sql`
 
 ### Query distribution
 - Join-based queries: **Q1–Q10** (10 queries)

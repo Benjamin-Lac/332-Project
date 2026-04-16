@@ -44,11 +44,11 @@ WHERE m.membership_status = 'Active'
 GROUP BY io.organization_name
 ORDER BY active_members DESC;
 
--- Q5: GDP growth by continent for 2022
+-- Q5: GDP growth by continent for the latest recorded year
 SELECT c.Continent, AVG(g.gdp_growth_pct) AS avg_growth_pct
 FROM country c
 JOIN country_gdp_history g ON g.country_code = c.Code
-WHERE g.record_year = 2022
+WHERE g.record_year = (SELECT MAX(record_year) FROM country_gdp_history)
 GROUP BY c.Continent
 HAVING COUNT(*) >= 2
 ORDER BY avg_growth_pct DESC;
@@ -73,13 +73,13 @@ LEFT JOIN city ci2
 WHERE ci2.ID IS NULL
 ORDER BY ci.Population DESC;
 
--- Q8: Countries with low risk and positive GDP growth in latest year
+-- Q8: Countries with low risk and positive GDP growth in latest recorded year
 SELECT c.Name, cra.risk_score, g.gdp_growth_pct
 FROM country c
 JOIN climate_risk_assessment cra ON cra.country_code = c.Code
 JOIN country_gdp_history g ON g.country_code = c.Code
 WHERE cra.risk_level = 'Low'
-  AND g.record_year = 2022
+  AND g.record_year = (SELECT MAX(record_year) FROM country_gdp_history)
   AND g.gdp_growth_pct > 0
 ORDER BY g.gdp_growth_pct DESC;
 
@@ -186,20 +186,29 @@ WHERE cra.risk_score > (
 )
 ORDER BY cra.risk_score DESC;
 
--- Q17: Countries whose 2022 GDP growth is lower than their 2021 GDP growth
+-- Q17: Countries whose latest GDP growth is lower than their previous recorded year
 SELECT c.Code, c.Name
 FROM country c
 WHERE c.Code IN (SELECT country_code FROM climate_risk_assessment)
   AND EXISTS (
   SELECT 1
-  FROM country_gdp_history g22
-  WHERE g22.country_code = c.Code
-    AND g22.record_year = 2022
-    AND g22.gdp_growth_pct < (
-      SELECT g21.gdp_growth_pct
-      FROM country_gdp_history g21
-      WHERE g21.country_code = c.Code
-        AND g21.record_year = 2021
+  FROM country_gdp_history g_latest
+  WHERE g_latest.country_code = c.Code
+    AND g_latest.record_year = (
+      SELECT MAX(g_max.record_year)
+      FROM country_gdp_history g_max
+      WHERE g_max.country_code = c.Code
+    )
+    AND g_latest.gdp_growth_pct < (
+      SELECT g_prev.gdp_growth_pct
+      FROM country_gdp_history g_prev
+      WHERE g_prev.country_code = c.Code
+        AND g_prev.record_year = (
+          SELECT MAX(g_prev2.record_year)
+          FROM country_gdp_history g_prev2
+          WHERE g_prev2.country_code = c.Code
+            AND g_prev2.record_year < g_latest.record_year
+        )
     )
 )
 ORDER BY c.Name;
