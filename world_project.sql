@@ -1,7 +1,6 @@
 -- ============================================================
 -- CPSC 332 - World Database Project
 -- Additional Tables + 20 Queries
--- Team: [Your Team Name] | Spring 2026
 -- ============================================================
 
 USE world;
