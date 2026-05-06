@@ -5362,3 +5362,663 @@ INSERT INTO CountryLanguage VALUES ('RUS','Belorussian','F',0.3);
 INSERT INTO CountryLanguage VALUES ('USA','Portuguese','F',0.2);
 COMMIT;
 
+
+
+-- ============================================================
+-- ADDITIONAL TABLES
+-- ============================================================
+
+-- ============================================================
+-- CPSC 332 - World Database Additional Tables
+-- Spring 2026
+-- ============================================================
+
+USE world;
+
+-- ============================================================
+-- TABLE 1: UN_Representative
+-- Stores information about each country's UN representative
+-- Links to Country via CountryCode (FK)
+-- ============================================================
+
+DROP TABLE IF EXISTS UN_Representative;
+CREATE TABLE UN_Representative (
+    RepID       INT(11)     NOT NULL AUTO_INCREMENT,
+    CountryCode CHAR(3)     NOT NULL DEFAULT '',
+    FirstName   CHAR(50)    NOT NULL,
+    LastName    CHAR(50)    NOT NULL,
+    Email       CHAR(100)   NOT NULL,
+    AppointDate DATE        NOT NULL,
+    TermEndDate DATE        DEFAULT NULL,
+    CONSTRAINT chk_term_end     CHECK (TermEndDate IS NULL OR TermEndDate > AppointDate),
+    PRIMARY KEY (RepID),
+    FOREIGN KEY (CountryCode) REFERENCES Country(Code)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO UN_Representative (CountryCode, FirstName, LastName, Email, AppointDate, TermEndDate) VALUES
+('USA', 'Linda',    'Thomas-Greenfield', 'ltg@un.org',        '2021-02-24', NULL),
+('CHN', 'Zhang',    'Jun',               'zjun@un.org',       '2019-09-01', NULL),
+('RUS', 'Vasily',   'Nebenzya',          'vnebenzya@un.org',  '2017-09-01', NULL),
+('GBR', 'Barbara',  'Woodward',          'bwoodward@un.org',  '2020-01-07', NULL),
+('FRA', 'Nicolas',  'de Rivière',        'nriviere@un.org',   '2019-09-01', NULL),
+('DEU', 'Antje',    'Leendertse',        'aleendertse@un.org','2022-05-01', NULL),
+('BRA', 'Sérgio',   'França Danese',     'sfdanese@un.org',   '2019-01-01', NULL),
+('IND', 'Ruchira',  'Kamboj',            'rkamboj@un.org',    '2022-08-02', NULL),
+('JPN', 'Kimihiro', 'Ishikane',          'kishikane@un.org',  '2019-12-21', NULL),
+('ZAF', 'Mathu',    'Joyini',            'mjoyini@un.org',    '2023-06-01', NULL),
+('MEX', 'Juan',     'Ramón de la Fuente','jrfuente@un.org',   '2024-01-15', NULL),
+('ARG', 'Ricardo',  'Lagorio',           'rlagorio@un.org',   '2020-02-01', NULL),
+('AUS', 'James',    'Larsen',            'jlarsen@un.org',    '2022-01-27', NULL),
+('EGY', 'Osama',    'Abdelkhalek',       'oabdelkhalek@un.org','2021-05-14',NULL),
+('NGA', 'Tijjani',  'Muhammad-Bande',    'tmbande@un.org',    '2018-11-16', '2022-11-15'),
+('KEN', 'Martin',   'Kimani',            'mkimani@un.org',    '2020-02-14', NULL),
+('PAK', 'Munir',    'Akram',             'makram@un.org',     '2019-02-28', NULL),
+('TUR', 'Ahmet',    'Yildiz',            'ayildiz@un.org',    '2023-03-01', NULL),
+('CAN', 'Bob',      'Rae',               'brae@un.org',       '2020-12-23', NULL),
+('KOR', 'Joonkook', 'Hwang',             'jhwang@un.org',     '2022-02-17', NULL);
+
+
+-- ============================================================
+-- TABLE 2: EconomicIndicator
+-- Annual economic data per country (GDP growth, inflation, etc.)
+-- Links to Country via CountryCode (FK)
+-- ============================================================
+
+DROP TABLE IF EXISTS EconomicIndicator;
+CREATE TABLE EconomicIndicator (
+    IndicatorID     INT(11)         NOT NULL AUTO_INCREMENT,
+    CountryCode     CHAR(3)         NOT NULL DEFAULT '',
+    Year            YEAR            NOT NULL,
+    GDPGrowthPct    DECIMAL(5,2)    DEFAULT NULL COMMENT 'Annual GDP growth %',
+    InflationPct    DECIMAL(5,2)    DEFAULT NULL COMMENT 'Annual inflation %',
+    UnemploymentPct DECIMAL(5,2)    DEFAULT NULL COMMENT 'Unemployment rate %',
+    TradeBalanceUSD DECIMAL(15,2)   DEFAULT NULL COMMENT 'Trade balance in millions USD',
+    FDIInflowUSD    DECIMAL(15,2)   DEFAULT NULL COMMENT 'Foreign direct investment inflows in millions USD',
+    PRIMARY KEY (IndicatorID),
+    UNIQUE KEY uq_country_year (CountryCode, Year),
+    FOREIGN KEY (CountryCode) REFERENCES Country(Code)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO EconomicIndicator (CountryCode, Year, GDPGrowthPct, InflationPct, UnemploymentPct, TradeBalanceUSD, FDIInflowUSD) VALUES
+('USA', 2000, 4.10,  3.40,  4.00,  -379000.00,  314007.00),
+('USA', 2010, 2.56,  1.64,  9.63,  -500000.00,  198000.00),
+('USA', 2020,-2.77,  1.23,  8.10,  -678000.00,  156000.00),
+('CHN', 2000, 8.49,  0.35,  3.10,   24100.00,    40715.00),
+('CHN', 2010,10.64,  3.31,  4.10,  181600.00,  114734.00),
+('CHN', 2020, 2.24,  2.42,  5.60,  535000.00,  149000.00),
+('RUS', 2000,10.00, 20.78,  9.80,   60100.00,    2714.00),
+('RUS', 2010, 4.50,  6.85,  7.50,  148000.00,   13810.00),
+('RUS', 2020,-2.65,  3.38,  5.80,   94200.00,    8600.00),
+('DEU', 2000, 2.94,  1.45,  7.90,   55000.00,   198276.00),
+('DEU', 2010, 4.16,  1.10,  7.00,  154000.00,    46136.00),
+('DEU', 2020,-4.62, -0.25,  5.90,  177000.00,    35576.00),
+('GBR', 2000, 3.78,  0.78,  5.40,  -33000.00,   118774.00),
+('GBR', 2010, 1.87,  3.27,  7.80,  -59000.00,    51202.00),
+('GBR', 2020,-9.33,  0.85,  4.50,  -48000.00,    24938.00),
+('JPN', 2000, 2.77, -0.68,  4.70,  116000.00,    8323.00),
+('JPN', 2010, 4.19, -0.72,  5.10,   78000.00,    -1250.00),
+('JPN', 2020,-4.30, -0.02,  2.80,   30000.00,    9640.00),
+('IND', 2000, 3.84,  4.01,  4.30,  -11000.00,    3585.00),
+('IND', 2010,10.26,  11.99, 3.50,  -44000.00,   27397.00),
+('IND', 2020,-6.60,  6.62,  7.10,  -15000.00,   64072.00),
+('BRA', 2000, 4.37,  7.05,  9.60,   -0700.00,   32779.00),
+('BRA', 2010, 7.53,  5.04,  6.70,   20100.00,   48506.00),
+('BRA', 2020,-3.88,  3.21, 13.50,  -11000.00,   37776.00),
+('ZAF', 2000, 4.20,  5.34, 26.70,   -1600.00,    888.00),
+('ZAF', 2010, 3.04,  4.26, 25.00,   -3600.00,    3629.00),
+('ZAF', 2020,-6.96,  3.22, 32.60,   16400.00,    3100.00),
+('MEX', 2000, 6.60,  9.49,  2.60,   -8300.00,   16592.00),
+('MEX', 2010, 5.11,  4.16,  5.30,  -11300.00,   20680.00),
+('MEX', 2020,-8.36,  3.40,  4.40,   34100.00,   29081.00),
+('ARG', 2000,-0.79, -0.94, 15.10,   12700.00,   10418.00),
+('ARG', 2010, 10.12, 22.90,  7.70,    3900.00,   11333.00),
+('ARG', 2020,-9.90,  42.02, 11.60,   12300.00,    4894.00),
+('NGA', 2000, 5.02,  6.93, 13.10,    3900.00,    1140.00),
+('NGA', 2010, 8.01, 13.72, 21.40,   26000.00,    6099.00),
+('NGA', 2020,-1.79, 13.25, 33.30,    2200.00,    2384.00),
+('KEN', 2000, 0.60,  9.97, 12.70,   -1000.00,     111.00),
+('KEN', 2010, 8.41,  3.96, 12.70,   -4300.00,     178.00),
+('KEN', 2020,-0.30,  5.35, 12.00,   -5200.00,     374.00);
+
+
+-- ============================================================
+-- TABLE 3: HealthStats
+-- Health and wellness statistics per country
+-- Links to Country via CountryCode (FK)
+-- ============================================================
+
+DROP TABLE IF EXISTS HealthStats;
+CREATE TABLE HealthStats (
+    HealthID            INT(11)         NOT NULL AUTO_INCREMENT,
+    CountryCode         CHAR(3)         NOT NULL DEFAULT '',
+    Year                YEAR            NOT NULL,
+    InfantMortalityRate DECIMAL(6,2)    DEFAULT NULL COMMENT 'Deaths per 1000 live births',
+    PhysiciansPer1000   DECIMAL(5,2)    DEFAULT NULL COMMENT 'Doctors per 1000 people',
+    HospitalBedsPer1000 DECIMAL(5,2)    DEFAULT NULL COMMENT 'Hospital beds per 1000 people',
+    HealthExpPctGDP     DECIMAL(5,2)    DEFAULT NULL COMMENT 'Health expenditure as % of GDP',
+    AccessToWaterPct    DECIMAL(5,2)    DEFAULT NULL COMMENT '% population with clean water access',
+    CONSTRAINT chk_infant_mort    CHECK (InfantMortalityRate >= 0),
+    CONSTRAINT chk_water_pct      CHECK (AccessToWaterPct BETWEEN 0 AND 100),
+    PRIMARY KEY (HealthID),
+    UNIQUE KEY uq_country_health_year (CountryCode, Year),
+    FOREIGN KEY (CountryCode) REFERENCES Country(Code)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO HealthStats (CountryCode, Year, InfantMortalityRate, PhysiciansPer1000, HospitalBedsPer1000, HealthExpPctGDP, AccessToWaterPct) VALUES
+('USA', 2000,  6.90,  2.27,  3.50, 13.10, 99.00),
+('USA', 2010,  6.10,  2.42,  3.10, 17.10, 99.00),
+('USA', 2020,  5.40,  2.61,  2.87, 19.70, 99.00),
+('CHN', 2000, 32.90,  1.06,  2.39,  4.60, 80.10),
+('CHN', 2010, 13.10,  1.46,  3.58,  5.10, 91.40),
+('CHN', 2020,  5.60,  2.21,  4.34,  5.70, 95.90),
+('RUS', 2000, 15.30,  4.20,  9.80,  5.40, 96.90),
+('RUS', 2010,  7.50,  4.31,  9.21,  6.30, 97.50),
+('RUS', 2020,  4.50,  3.75,  7.10,  7.60, 97.90),
+('DEU', 2000,  4.40,  3.60,  9.10, 10.30, 99.90),
+('DEU', 2010,  3.40,  3.82,  8.27, 11.50, 99.90),
+('DEU', 2020,  3.10,  4.34,  8.00, 12.80, 99.90),
+('GBR', 2000,  5.60,  2.30,  4.10,  6.90, 100.00),
+('GBR', 2010,  4.20,  2.73,  2.95,  8.40, 100.00),
+('GBR', 2020,  3.60,  3.00,  2.54,  9.80, 100.00),
+('JPN', 2000,  3.20,  1.98,  8.10,  7.60, 100.00),
+('JPN', 2010,  2.30,  2.21, 13.58, 10.00, 100.00),
+('JPN', 2020,  1.80,  2.49, 13.05, 11.10, 100.00),
+('IND', 2000, 67.60,  0.51,  0.70,  4.30, 78.10),
+('IND', 2010, 44.60,  0.65,  0.90,  4.20, 87.60),
+('IND', 2020, 27.40,  0.74,  0.53,  3.50, 93.40),
+('BRA', 2000, 29.80,  1.25,  2.60,  7.30, 87.00),
+('BRA', 2010, 16.70,  1.76,  2.35,  9.00, 96.60),
+('BRA', 2020,  9.80,  2.31,  2.19,  9.80, 99.00),
+('ZAF', 2000, 47.20,  0.74,  2.84,  8.10, 82.40),
+('ZAF', 2010, 34.90,  0.77,  2.84,  8.70, 90.00),
+('ZAF', 2020, 28.30,  0.91,  2.84,  8.30, 89.40),
+('MEX', 2000, 21.40,  1.50,  1.00,  5.10, 88.60),
+('MEX', 2010, 13.20,  1.96,  1.60,  5.90, 94.40),
+('MEX', 2020,  9.10,  2.43,  1.38,  5.40, 97.20),
+('ARG', 2000, 16.60,  2.88,  4.10,  9.10, 94.30),
+('ARG', 2010, 13.30,  3.21,  4.70,  8.10, 98.40),
+('ARG', 2020,  8.90,  4.06,  5.00,  9.80, 99.00),
+('NGA', 2000, 96.40,  0.28,  1.53,  3.40, 47.80),
+('NGA', 2010, 72.10,  0.38,  0.53,  3.80, 62.10),
+('NGA', 2020, 53.30,  0.38,  0.50,  3.40, 72.30),
+('KEN', 2000, 60.10,  0.14,  1.40,  4.90, 46.00),
+('KEN', 2010, 42.60,  0.20,  1.40,  5.70, 61.90),
+('KEN', 2020, 28.90,  0.24,  1.40,  5.00, 74.20);
+
+
+
+
+-- ============================================================
+-- QUERIES
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- country_capital_econ_stats
+-- ------------------------------------------------------------
+SELECT 
+    c.Name AS Country,
+    ci.Name AS Capital,
+    e.Year,
+    e.GDPGrowthPct,
+    e.UnemploymentPct,
+    e.InflationPct
+FROM EconomicIndicator e
+JOIN Country c ON e.CountryCode = c.Code
+JOIN City ci ON c.Capital = ci.ID
+ORDER BY c.Name, e.Year;
+
+-- ------------------------------------------------------------
+-- FDI
+-- ------------------------------------------------------------
+SELECT 
+    r.FirstName,
+    r.LastName,
+    c.Name AS Country,
+    c.Continent,
+    e.FDIInflowUSD
+FROM UN_Representative r
+JOIN Country c ON r.CountryCode = c.Code
+JOIN EconomicIndicator e ON r.CountryCode = e.CountryCode
+WHERE e.Year = 2010
+  AND e.FDIInflowUSD > (
+    SELECT AVG(FDIInflowUSD)
+    FROM EconomicIndicator
+    WHERE Year = 2010
+)
+ORDER BY e.FDIInflowUSD DESC;
+
+-- ------------------------------------------------------------
+-- health_stats
+-- ------------------------------------------------------------
+SELECT 
+    c.Name AS Country,
+    c.Continent,
+    cl.Language AS OfficialLanguage,
+    h.InfantMortalityRate,
+    h.HealthExpPctGDP,
+    h.AccessToWaterPct
+FROM HealthStats h
+JOIN Country c ON h.CountryCode = c.Code
+JOIN CountryLanguage cl ON c.Code = cl.CountryCode
+WHERE cl.IsOfficial = 'T'
+ORDER BY h.InfantMortalityRate DESC;
+
+-- ------------------------------------------------------------
+-- un_rep_negative_GDP_2020
+-- ------------------------------------------------------------
+SELECT 
+    r.FirstName,
+    r.LastName,
+    r.CountryCode,
+    r.AppointDate
+FROM UN_Representative r
+WHERE r.CountryCode IN (
+    SELECT e.CountryCode
+    FROM EconomicIndicator e
+    WHERE e.Year = 2020 AND e.GDPGrowthPct < 0
+);
+
+-- ------------------------------------------------------------
+-- unemployment
+-- ------------------------------------------------------------
+SELECT 
+    ci.Name AS City,
+    ci.District,
+    ci.Population,
+    co.Name AS Country
+FROM City ci
+JOIN Country co ON ci.CountryCode = co.Code
+WHERE ci.CountryCode IN (
+    SELECT DISTINCT CountryCode
+    FROM EconomicIndicator
+    WHERE UnemploymentPct > 10
+)
+ORDER BY ci.Population DESC
+LIMIT 20;
+
+-- ------------------------------------------------------------
+-- un_reps
+-- ------------------------------------------------------------
+SELECT 
+    r.FirstName,
+    r.LastName,
+    r.Email,
+    c.Name AS Country,
+    c.Region,
+    c.Population
+FROM UN_Representative r
+JOIN Country c ON r.CountryCode = c.Code
+ORDER BY c.Population DESC;
+
+-- ------------------------------------------------------------
+-- gdp_inflation_pre_2010
+-- ------------------------------------------------------------
+SELECT
+c.Code, c.Name,
+ec.GDPGrowthPct, ec.InflationPct, ec.UnemploymentPct
+FROM country AS c
+INNER JOIN economicindicator AS ec
+ON c.Code = ec.CountryCode
+WHERE ec.Year <= 2010;
+
+-- ------------------------------------------------------------
+-- health_stats_2010
+-- ------------------------------------------------------------
+SELECT
+c.Code, c.Name, c.LifeExpectancy,
+hs.InfantMortalityRate, hs.AccessToWaterPct
+FROM country AS c
+INNER JOIN healthstats AS hs
+ON c.Code = hs.CountryCode
+WHERE hs.Year = 2010;
+
+-- ------------------------------------------------------------
+-- health_stats_un_rep
+-- ------------------------------------------------------------
+SELECT
+hs.CountryCode, hs.InfantMortalityRate, hs.InfantMortalityRate,
+un.FirstName, un.LastName
+FROM un_representative as un
+INNER JOIN healthstats as hs
+ON hs.CountryCode = un.CountryCode
+WHERE hs.CountryCode in (
+	SELECT
+    c.Code
+    FROM country AS c
+);
+
+-- ------------------------------------------------------------
+-- water_access_surface_area
+-- ------------------------------------------------------------
+SELECT
+c.Code, c.SurfaceArea,
+hs.AccessToWaterPct
+FROM country AS c, healthstats AS hs
+WHERE c.Code IN (
+	SELECT
+    hs.CountryCode
+    FROM healthstats as hs
+    WHERE hs.AccessToWaterPct IS NOT NULL
+);
+
+-- ------------------------------------------------------------
+-- language_econ_indicators
+-- ------------------------------------------------------------
+SELECT
+c.code, c.Name,
+ec.GDPGrowthPct, ec.year,
+cl.Language, cl.Percentage
+FROM country AS c
+JOIN economicindicator AS ec
+	ON c.Code = ec.CountryCode
+JOIN countrylanguage AS cl
+	ON c.Code = cl.CountryCode
+WHERE c.Code IN
+(
+	SELECT
+    cl.CountryCode
+    FROM countryLanguage as cl
+    WHERE cl.IsOfficial = True
+);
+
+-- ------------------------------------------------------------
+-- population_density_2020
+-- ------------------------------------------------------------
+SELECT
+    co.Name                                                         AS Country,
+    co.Continent,
+    co.Population,
+    co.SurfaceArea,
+    ROUND(co.Population / co.SurfaceArea, 2)                       AS PopDensityPerKm2,
+    (SELECT ei.GDPGrowthPct
+     FROM EconomicIndicator ei
+     WHERE ei.CountryCode = co.Code AND ei.Year = 2020)            AS GDPGrowthPct,
+    (SELECT ei.UnemploymentPct
+     FROM EconomicIndicator ei
+     WHERE ei.CountryCode = co.Code AND ei.Year = 2020)            AS UnemploymentPct,
+    (SELECT hs.AccessToWaterPct
+     FROM HealthStats hs
+     WHERE hs.CountryCode = co.Code AND hs.Year = 2020)            AS AccessToWaterPct,
+    (SELECT hs.PhysiciansPer1000
+     FROM HealthStats hs
+     WHERE hs.CountryCode = co.Code AND hs.Year = 2020)            AS PhysiciansPer1000
+FROM Country co
+WHERE co.SurfaceArea > 0
+  AND co.Population IS NOT NULL
+  AND co.Code IN (SELECT CountryCode FROM EconomicIndicator WHERE Year = 2020)
+  AND co.Code IN (SELECT CountryCode FROM HealthStats WHERE Year = 2020)
+ORDER BY PopDensityPerKm2 DESC;
+
+-- ------------------------------------------------------------
+-- gnp_growth_un_rep_health
+-- ------------------------------------------------------------
+SELECT
+    co.Name                                                         AS Country,
+    co.Continent,
+    co.GNP,
+    co.GNPOld,
+    ROUND(co.GNP - co.GNPOld, 2)                                   AS GNPChange,
+    ROUND((co.GNP - co.GNPOld) / NULLIF(co.GNPOld, 0) * 100, 2)  AS GNPGrowthPct,
+    (SELECT CONCAT(r.FirstName, ' ', r.LastName)
+     FROM UN_Representative r
+     WHERE r.CountryCode = co.Code AND r.TermEndDate IS NULL)       AS UNRepresentative,
+    (SELECT MAX(r.AppointDate)
+     FROM UN_Representative r
+     WHERE r.CountryCode = co.Code)                                 AS AppointDate,
+    (SELECT hs.HealthExpPctGDP
+     FROM HealthStats hs
+     WHERE hs.CountryCode = co.Code AND hs.Year = 2020)            AS HealthExpPctGDP,
+    (SELECT hs.HospitalBedsPer1000
+     FROM HealthStats hs
+     WHERE hs.CountryCode = co.Code AND hs.Year = 2020)            AS HospitalBedsPer1000
+FROM Country co
+WHERE co.GNP    IS NOT NULL
+  AND co.GNPOld IS NOT NULL
+  AND co.Code IN (SELECT CountryCode FROM UN_Representative)
+  AND co.Code IN (SELECT CountryCode FROM HealthStats WHERE Year = 2020)
+ORDER BY GNPGrowthPct DESC;
+
+-- ------------------------------------------------------------
+-- infant_mortality_reduction
+-- ------------------------------------------------------------
+SELECT
+    co.Name                                                         AS Country,
+    co.Continent,
+    (SELECT hs.InfantMortalityRate
+     FROM HealthStats hs
+     WHERE hs.CountryCode = co.Code AND hs.Year = 2000)            AS InfantMort2000,
+    (SELECT hs.InfantMortalityRate
+     FROM HealthStats hs
+     WHERE hs.CountryCode = co.Code AND hs.Year = 2020)            AS InfantMort2020,
+    ROUND(
+        (SELECT hs.InfantMortalityRate
+         FROM HealthStats hs
+         WHERE hs.CountryCode = co.Code AND hs.Year = 2020)
+        /
+        (SELECT hs.InfantMortalityRate
+         FROM HealthStats hs
+         WHERE hs.CountryCode = co.Code AND hs.Year = 2000)
+        * 100, 1)                                                   AS PctOfOriginal,
+    (SELECT ei.GDPGrowthPct
+     FROM EconomicIndicator ei
+     WHERE ei.CountryCode = co.Code AND ei.Year = 2020)            AS GDPGrowth2020,
+    (SELECT CONCAT(r.FirstName, ' ', r.LastName)
+     FROM UN_Representative r
+     WHERE r.CountryCode = co.Code AND r.TermEndDate IS NULL)       AS CurrentUNRep
+FROM Country co
+WHERE co.Code IN (SELECT CountryCode FROM HealthStats WHERE Year = 2000)
+  AND co.Code IN (SELECT CountryCode FROM HealthStats WHERE Year = 2020)
+  AND co.Code IN (SELECT CountryCode FROM EconomicIndicator WHERE Year = 2020)
+  AND EXISTS (
+      SELECT 1 FROM HealthStats hs_a
+      WHERE hs_a.CountryCode = co.Code AND hs_a.Year = 2020
+        AND hs_a.InfantMortalityRate < (
+            SELECT hs_b.InfantMortalityRate * 0.50
+            FROM HealthStats hs_b
+            WHERE hs_b.CountryCode = co.Code AND hs_b.Year = 2000
+        )
+  )
+ORDER BY PctOfOriginal ASC;
+
+-- ------------------------------------------------------------
+-- physician_density_below_avg
+-- ------------------------------------------------------------
+SELECT
+    co.Name                                                         AS Country,
+    co.Continent,
+    (SELECT hs.PhysiciansPer1000
+     FROM HealthStats hs
+     WHERE hs.CountryCode = co.Code AND hs.Year = 2020)            AS PhysiciansPer1000,
+    (SELECT ROUND(AVG(hs2.PhysiciansPer1000), 2)
+     FROM HealthStats hs2
+     WHERE hs2.CountryCode IN (
+         SELECT Code FROM Country WHERE Continent = co.Continent
+     ) AND hs2.Year = 2020)                                        AS ContinentAvgPhysicians,
+    ROUND(
+        (SELECT hs.PhysiciansPer1000
+         FROM HealthStats hs
+         WHERE hs.CountryCode = co.Code AND hs.Year = 2020)
+        -
+        (SELECT AVG(hs2.PhysiciansPer1000)
+         FROM HealthStats hs2
+         WHERE hs2.CountryCode IN (
+             SELECT Code FROM Country WHERE Continent = co.Continent
+         ) AND hs2.Year = 2020)
+    , 2)                                                            AS GapFromContinentAvg,
+    (SELECT ei.GDPGrowthPct
+     FROM EconomicIndicator ei
+     WHERE ei.CountryCode = co.Code AND ei.Year = 2020)            AS GDPGrowthPct,
+    (SELECT ei.UnemploymentPct
+     FROM EconomicIndicator ei
+     WHERE ei.CountryCode = co.Code AND ei.Year = 2020)            AS UnemploymentPct
+FROM Country co
+WHERE co.Code IN (SELECT CountryCode FROM HealthStats WHERE Year = 2020)
+  AND co.Code IN (SELECT CountryCode FROM EconomicIndicator WHERE Year = 2020)
+  AND EXISTS (
+      SELECT 1 FROM HealthStats hs_a
+      WHERE hs_a.CountryCode = co.Code AND hs_a.Year = 2020
+        AND hs_a.PhysiciansPer1000 < (
+            SELECT AVG(hs3.PhysiciansPer1000)
+            FROM HealthStats hs3
+            WHERE hs3.CountryCode IN (
+                SELECT Code FROM Country WHERE Continent = co.Continent
+            ) AND hs3.Year = 2020
+        )
+  )
+ORDER BY co.Continent, PhysiciansPer1000 ASC;
+
+-- ------------------------------------------------------------
+-- trade_balance_vs_health_exp
+-- ------------------------------------------------------------
+SELECT
+    co.Name                                                         AS Country,
+    co.Continent,
+    (SELECT ei.TradeBalanceUSD
+     FROM EconomicIndicator ei
+     WHERE ei.CountryCode = co.Code AND ei.Year = 2000)            AS TradeBalance2000,
+    (SELECT ei.TradeBalanceUSD
+     FROM EconomicIndicator ei
+     WHERE ei.CountryCode = co.Code AND ei.Year = 2020)            AS TradeBalance2020,
+    ROUND(
+        (SELECT ei.TradeBalanceUSD
+         FROM EconomicIndicator ei
+         WHERE ei.CountryCode = co.Code AND ei.Year = 2020)
+        -
+        (SELECT ei.TradeBalanceUSD
+         FROM EconomicIndicator ei
+         WHERE ei.CountryCode = co.Code AND ei.Year = 2000)
+    , 0)                                                            AS TradeBalanceChange,
+    (SELECT hs.HealthExpPctGDP
+     FROM HealthStats hs
+     WHERE hs.CountryCode = co.Code AND hs.Year = 2000)            AS HealthExp2000,
+    (SELECT hs.HealthExpPctGDP
+     FROM HealthStats hs
+     WHERE hs.CountryCode = co.Code AND hs.Year = 2020)            AS HealthExp2020,
+    ROUND(
+        (SELECT hs.HealthExpPctGDP
+         FROM HealthStats hs
+         WHERE hs.CountryCode = co.Code AND hs.Year = 2020)
+        -
+        (SELECT hs.HealthExpPctGDP
+         FROM HealthStats hs
+         WHERE hs.CountryCode = co.Code AND hs.Year = 2000)
+    , 2)                                                            AS HealthExpChange,
+    (SELECT CONCAT(r.FirstName, ' ', r.LastName)
+     FROM UN_Representative r
+     WHERE r.CountryCode = co.Code AND r.TermEndDate IS NULL)       AS UNRepresentative
+FROM Country co
+WHERE co.Code IN (SELECT CountryCode FROM EconomicIndicator WHERE Year = 2000)
+  AND co.Code IN (SELECT CountryCode FROM EconomicIndicator WHERE Year = 2020)
+  AND co.Code IN (SELECT CountryCode FROM HealthStats WHERE Year = 2000)
+  AND co.Code IN (SELECT CountryCode FROM HealthStats WHERE Year = 2020)
+ORDER BY TradeBalanceChange DESC;
+
+-- ------------------------------------------------------------
+-- official_languages_econ_2020
+-- ------------------------------------------------------------
+SELECT
+    co.Name        AS Country,
+    co.Continent,
+    cl.Language    AS OfficialLanguage,
+    cl.Percentage  AS SpokenByPct,
+    ei.GDPGrowthPct,
+    ei.InflationPct,
+    ei.UnemploymentPct
+FROM Country co
+JOIN CountryLanguage cl ON co.Code = cl.CountryCode
+JOIN EconomicIndicator ei ON co.Code = ei.CountryCode
+WHERE cl.IsOfficial = 'T'
+  AND ei.Year = 2020
+ORDER BY co.Name, cl.Percentage DESC;
+
+-- ------------------------------------------------------------
+-- un_rep_capital_health_2020
+-- ------------------------------------------------------------
+SELECT
+    un.FirstName,
+    un.LastName,
+    co.Name                  AS Country,
+    co.Continent,
+    ci.Name                  AS Capital,
+    hs.HospitalBedsPer1000,
+    hs.PhysiciansPer1000,
+    hs.HealthExpPctGDP
+FROM UN_Representative un
+JOIN Country co ON un.CountryCode = co.Code
+JOIN City ci ON co.Capital = ci.ID
+JOIN HealthStats hs ON co.Code = hs.CountryCode
+WHERE hs.Year = 2020
+ORDER BY hs.HospitalBedsPer1000 DESC;
+
+-- ------------------------------------------------------------
+-- country_capital_un_rep
+-- ------------------------------------------------------------
+SELECT co.name AS Country, ci.name AS CapitalCity,
+	un.FirstName, un.LastName, un.AppointDate
+FROM Country co
+JOIN city ci ON co.Capital = ci.ID
+JOIN UN_REPRESENTATIVE un ON co.Code = un.CountryCode;
+
+-- ------------------------------------------------------------
+-- dominant_language_health
+-- ------------------------------------------------------------
+SELECT co.Name AS Country, co.Continent,
+       (SELECT cl.Language FROM CountryLanguage cl 
+        WHERE cl.CountryCode = co.Code AND cl.IsOfficial = 'T' 
+        AND cl.Percentage >= 80 LIMIT 1) AS DominantLanguage,
+       (SELECT hs.AccessToWaterPct FROM HealthStats hs 
+        WHERE hs.CountryCode = co.Code AND hs.Year = 2020) AS AccessToWaterPct,
+       (SELECT hs.InfantMortalityRate FROM HealthStats hs 
+        WHERE hs.CountryCode = co.Code AND hs.Year = 2020) AS InfantMortalityRate
+FROM Country co
+WHERE co.Code IN (SELECT cl.CountryCode FROM CountryLanguage cl 
+                  WHERE cl.IsOfficial = 'T' AND cl.Percentage >= 80)
+  AND co.Code IN (SELECT hs.CountryCode FROM HealthStats hs WHERE hs.Year = 2020);
+
+-- ------------------------------------------------------------
+-- un_rep_above_avg_water
+-- ------------------------------------------------------------
+SELECT co.Name AS Country, co.Continent,
+       (SELECT CONCAT(un.FirstName, ' ', un.LastName) FROM UN_Representative un 
+        WHERE un.CountryCode = co.Code LIMIT 1) AS UNRep,
+       (SELECT hs.AccessToWaterPct FROM HealthStats hs 
+        WHERE hs.CountryCode = co.Code AND hs.Year = 2020) AS AccessToWaterPct
+FROM Country co
+WHERE co.Code IN (SELECT un.CountryCode FROM UN_Representative un)
+  AND (SELECT hs.AccessToWaterPct FROM HealthStats hs 
+       WHERE hs.CountryCode = co.Code AND hs.Year = 2020) > 
+      (SELECT AVG(hs2.AccessToWaterPct) FROM HealthStats hs2 WHERE hs2.Year = 2020);
+
+-- ------------------------------------------------------------
+-- cities_positive_gdp_2020
+-- ------------------------------------------------------------
+SELECT ci.Name AS City, ci.District, ci.Population,
+       co.Name AS Country,
+       (SELECT ei.GDPGrowthPct FROM EconomicIndicator ei 
+        WHERE ei.CountryCode = co.Code AND ei.Year = 2020) AS GDPGrowth2020
+FROM City ci
+JOIN Country co ON ci.CountryCode = co.Code
+WHERE co.Code IN (SELECT ei.CountryCode FROM EconomicIndicator ei 
+                  WHERE ei.Year = 2020 AND ei.GDPGrowthPct > 0)
+ORDER BY GDPGrowth2020 DESC;
+
+-- ------------------------------------------------------------
+-- declining_unemployment
+-- ------------------------------------------------------------
+SELECT co.Name AS Country, co.Continent,
+       (SELECT CONCAT(un.FirstName, ' ', un.LastName) FROM UN_Representative un
+        WHERE un.CountryCode = co.Code LIMIT 1) AS UNRep,
+       (SELECT ei.UnemploymentPct FROM EconomicIndicator ei
+        WHERE ei.CountryCode = co.Code AND ei.Year = 2000) AS Unemployment2000,
+       (SELECT ei.UnemploymentPct FROM EconomicIndicator ei
+        WHERE ei.CountryCode = co.Code AND ei.Year = 2020) AS Unemployment2020
+FROM Country co
+WHERE co.Code IN (SELECT un.CountryCode FROM UN_Representative un)
+  AND (SELECT ei.UnemploymentPct FROM EconomicIndicator ei
+       WHERE ei.CountryCode = co.Code AND ei.Year = 2020) <
+      (SELECT ei.UnemploymentPct FROM EconomicIndicator ei
+       WHERE ei.CountryCode = co.Code AND ei.Year = 2000)
+ORDER BY Unemployment2020 ASC;
